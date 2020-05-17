@@ -7,12 +7,12 @@ class Xls2html():
         self.filepath = filepath
         self.sheet = sheet
 
-    def convert(self):
+    def convert(self, encoding="UTF-8"):
         self.wb = xlrd.open_workbook(
             filepath, formatting_info=True)
         self.ws = self.get_sheet()
         self.data = self.worksheet_to_data()
-        self.html = self.render_data_to_html()
+        self.html = self.render_data_to_html(encoding=encoding)
 
     def save(self, save_to):
         if self.html and save_to:
@@ -32,12 +32,12 @@ class Xls2html():
             ws = self.wb.sheet_by_index(0)
         return ws
 
-    def render_data_to_html(self):
+    def render_data_to_html(self, encoding="UTF-8"):
         html = '''
         <!DOCTYPE html>
         <html>
         <head>
-            <meta charset="UTF-8">
+            <meta charset="%s">
             <title>Title</title>
         <style>
             td {
@@ -54,7 +54,7 @@ class Xls2html():
         </body>
         </html>
         '''
-        return html % self.render_table()
+        return html % (encoding, self.render_table())
 
     def render_attrs(self, attrs):
         if not attrs:
@@ -102,7 +102,6 @@ class Xls2html():
         merged_cell_map = {}
         excluded_cells = {}
         merged_cell_ranges = self.ws.merged_cells
-        print(merged_cell_ranges)
         for rs in merged_cell_ranges:
             topRow = rs[0]
             bottomRow = rs[1] - 1
@@ -175,5 +174,5 @@ class Xls2html():
 if __name__ == "__main__":
     filepath = "现场复工流程-4.13.xls"
     x2h = Xls2html(filepath)
-    x2h.convert()
+    x2h.convert(encoding="GB2312")
     x2h.save("test.html")
